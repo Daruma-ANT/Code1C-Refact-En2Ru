@@ -1,0 +1,83 @@
+{
+	"Var": {
+		"isApply": 1,
+		"Desc": "Var --> Перем",
+		"RegEx": "^([ \t]*)(Var)([ \t]+)",
+		"ReplaceWith": "\\1Перем\\3"
+	},
+	"Return": {
+		"isApply": 1,
+		"Desc": "Return --> Возврат",
+		"RegEx": "^([ \t]+)(Return)([ \t;]*)",
+		"ReplaceWith": "\\1Возврат\\3"
+	},
+
+	"IfThen": {
+		"isApply": 1,
+		"Desc": "If...Then --> Если...Тогда",
+		"RegEx": "^([ \\t]+)(If)(.+[ \\t]+)(Then)([ \\t]*)$",
+		"ReplaceWith": "\\1Если\\3Тогда\\5"
+	},
+	"ElsIfThen": {
+		"isApply": 1,
+		"Desc": "ElseIf...Then --> ИначеЕсли...Тогда",
+		"RegEx": "^([ \\t]+)(ElsIf)(.+[ \\t]+)(Then)([ \\t]*)$",
+		"ReplaceWith": "\\1ИначеЕсли\\3Тогда\\5"
+	},
+	"Else": {
+		"isApply": 1,
+		"Desc": "Else --> Иначе",
+		"RegEx": "^([ \\t]+)(Else)([ \\t]*)$",
+		"ReplaceWith": "\\1Иначе\\3"
+	},
+	"EndIf": {
+		"isApply": 1,
+		"Desc": "EndIf --> КонецЕсли",
+		"RegEx": "^([ \\t]+)(EndIf)([ \\t;]*)$",
+		"ReplaceWith": "\\1КонецЕсли\\3"
+	},
+
+	"ForEach": {
+		"isApply": 1,
+		"Desc": "For Each...Do --> Для Каждого...Цикл",
+		"RegEx": "^([ \\t]+)(For Each)(.+[ \\t]+)(In)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"ReplaceWith": "\\1Для Каждого\\3Из\\5Цикл\\7"
+	},
+	"ForTo": {
+		"isApply": 1,
+		"Desc": "For...To...Do --> Для...По...Цикл",
+		"RegEx": "^([ \\t]+)(For)(.+[ \\t]+)(To)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"ReplaceWith": "\\1Для\\3По\\5Цикл\\7"
+	},
+	"While": {
+		"isApply": 1,
+		"Desc": "While...Do --> Пока...Цикл",
+		"RegEx": "^([ \\t]+)(For)(.+[ \\t]+)(To)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"ReplaceWith": "\\1Для Каждого\\3По\\5Цикл\\7"
+	},
+	"EndDo": {
+		"isApply": 1,
+		"Desc": "EndDo --> КонецЦикла",
+		"RegEx": "^([ \\t]+)(EndDo)([ \\t;]*)$",
+		"ReplaceWith": "\\1КонецЦикла\\3"
+	},
+
+	"SignAssignment": {
+		"isApply": 0,
+		"Desc": "рефакторинг операции присваивания",
+		"RegEx": "[ ]*=[ ]*",
+		"ReplaceWith": " = "
+	},
+	"TrailingSpaces": {
+		"isApply": 0,
+		"Desc": "удаление концевых пробелов",
+		"RegEx": "[ \\t]+$",
+		"ReplaceWith": ""
+	},
+	"FunctionsGaps ": {
+		"isApply": 0,
+		"Desc": "сворачиваем промежутки между функциями (процедурами)",
+		"RegEx": "(?<=Конец(Функции)|(Процедуры))\\s*(?=(Функция|Процедура|&На))",
+		"ReplaceWith": "\\n\\n"
+	}
+}
