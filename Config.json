@@ -1,0 +1,7 @@
+{
+	"SourceRootDir" : "E:\\Work\\CodeRefact\\src",
+	"SourceFilesExt" : ["bsl"],
+	"SourceFilesCodePage" : "utf-8",
+	"RegExRulesPath" : "E:\\Work\\CodeRefact\\RefactoringRules.json",
+	"KeyWordToRU":	1
+}
