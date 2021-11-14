@@ -23,17 +23,19 @@ dict_functions_name = {
 }
 
 
-def createParser():
-    parser = argparse.ArgumentParser(
-        prog = 'coderefact',
-        description = '''Рефакторинг исходного кода модулей с английского на русский согласно описанных правил.
+def create_parser():
+
+    arg_parser = argparse.ArgumentParser(
+        prog='coderefact',
+        description='''Рефакторинг исходного кода модулей с английского на русский согласно описанных правил.
                         Правила находятся в файле в формате json, имя файла передаются программе через параметр --rules  
                         ''',
-        epilog = '''ZAA 2021 Автор, как обычно, ни перед кем ничего и никогда :)'''
+        epilog='''ZAA 2021. Автор, как обычно, ни перед кем, ничего, никогда :)'''
     )
     # parser.add_argument('-r', '--rules', type=argparse.FileType(), default="RefactoringRules.json")
-    parser.add_argument('-r', '--rules', default="RefactoringRules.json")
-    return parser
+    arg_parser.add_argument('-r', '--rules', default="RefactoringRules.json", metavar="ПУТЬ",
+                            help="Путь к файлу с правилами (по умолчанию \"RefactoringRules.json\" в текущем каталоге)")
+    return arg_parser
 
 
 def read_rules(file_name: str) -> dict:
@@ -119,15 +121,15 @@ def refactoring_all(SourceFilesRoot: str):
 
 if __name__ == '__main__':
 
-    parser = createParser()
+    parser = create_parser()
     namespace = parser.parse_args(sys.argv[1:])
 
-    rules_filePath = namespace.re_rules
-    if not os.path.isfile(rules_filePath):
-        print(f"Файл правил \"{rules_filePath}\" не существует.")
+    rules_filepath = namespace.re_rules
+    if not os.path.isfile(rules_filepath):
+        print(f"Файл правил \"{rules_filepath}\" не существует.")
         exit(-1)
 
-    print(f"Файл правил: {rules_filePath}.")
+    print(f"Файл правил: {rules_filepath}.")
 
-    rules_dict = read_rules(rules_filePath)
+    rules_dict = read_rules(rules_filepath)
     refactoring_all(source_files_dir)
