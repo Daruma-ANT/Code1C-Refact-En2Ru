@@ -1,12 +1,12 @@
 {
 	"Var": {
-		"isApply": 0,
+		"isApply": 1,
 		"Desc": "Var --> Перем",
 		"RegEx": "^([ \t]*)(Var)([ \t]+)",
 		"ReplaceWith": "\\1Перем\\3"
 	},
 	"Return": {
-		"isApply": 0,
+		"isApply": 1,
 		"Desc": "Return --> Возврат",
 		"RegEx": "^([ \t]+)(Return)([ \t;]*)",
 		"ReplaceWith": "\\1Возврат\\3"

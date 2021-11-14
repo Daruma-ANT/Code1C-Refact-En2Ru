@@ -1,15 +1,14 @@
+import sys
 import json
 import os
 import re
+import argparse
 
 source_files_dir = "C:\\Users\\home\\OneDrive\\Repos\\ViPNetEDI\\ViPNetEDI_3\\src"
-#source_files_dir = "E:\\Work\\CodeRefact\\src"
 source_files_cp = "utf-8"
 source_files_ext = ["bsl"]
 
-RE_RULES_FILE = "RefactoringRules.json"
-
-re_rules = dict()
+rules_dict = dict()
 
 dict_functions_name = {
     "TypeOf": "ТипЗнч",
@@ -23,7 +22,26 @@ dict_functions_name = {
     "IsBlankString": "ПустаяСтрока",
 }
 
-def read_re_rules(file_name: str) -> dict:
+
+def createParser():
+    parser = argparse.ArgumentParser(
+        prog = 'coderefact',
+        description = '''Рефакторинг исходного кода модулей с английского на русский согласно описанных правил.
+                        Правила находятся в файле в формате json, имя файла передаются программе через параметр --rules  
+                        ''',
+        epilog = '''ZAA 2021 Автор, как обычно, ни перед кем ничего и никогда :)'''
+    )
+    # parser.add_argument('-r', '--rules', type=argparse.FileType(), default="RefactoringRules.json")
+    parser.add_argument('-r', '--rules', default="RefactoringRules.json")
+    return parser
+
+
+def read_rules(file_name: str) -> dict:
+    """ Читает правила рефакторинга из JSON файла
+
+    :param file_name: str
+    :return: dict
+    """
     with open(file_name, "r", encoding="utf-8") as rules_file:
         data = {key: value for key, value in json.load(rules_file).items() if value.get("isApply", 0) == 1}
     return data
@@ -31,11 +49,10 @@ def read_re_rules(file_name: str) -> dict:
 
 def apply_rule(text: str, rule: dict):
     """ Обрабатывает текст согласно переданному правилу
-    Args:
-        text (str): Обрабатываемый текст
-        rule (dict): Правило обработки
-    Returns:
-        str: Обработанный текст
+
+        :param text: str
+        :param rule: dict
+        :return: str
     """
     regex = rule.get("RegEx", "")
     if len(regex.strip()) == 0:
@@ -54,7 +71,11 @@ def apply_rule(text: str, rule: dict):
 
 
 def refactoring_functions_name(text: str):
+    """ Изменяет имена встроенных функций платформы c английского на русский
 
+    :param text: str
+    :return: str
+    """
     for key, value in dict_functions_name.items():
         # ([ = <> (])(TypeOf)\(
         regex = r"([ =<>(])("+ key + ")\("
@@ -65,7 +86,7 @@ def refactoring_functions_name(text: str):
 
 
 def refactoring_module(file_path: str):
-    """Обрабатывает содержимое переданного по имени файла
+    """ Обрабатывает содержимое переданного по имени файла
     Args:
         file_path (str): Путь к обрабатываемому файлу
     """
@@ -74,7 +95,7 @@ def refactoring_module(file_path: str):
     with open(file_path, "r", encoding=source_files_cp) as f:
         text = f.read()
 
-    for rule_value in re_rules.values():
+    for rule_value in rules_dict.values():
         text = apply_rule(text, rule_value)
 
     text = refactoring_functions_name(text)
@@ -84,7 +105,8 @@ def refactoring_module(file_path: str):
 
 
 def refactoring_all(SourceFilesRoot: str):
-    """ В переданном каталоге обрабатывает рекурсивно все файлы с заданными расширениями
+    """В переданном каталоге обрабатывает рекурсивно все файлы с заданными расширениями
+
     Args:
         SourceFilesRoot (str): Корневой каталог файлов с исходными кодами
     """
@@ -94,7 +116,18 @@ def refactoring_all(SourceFilesRoot: str):
                 refactoring_module(os.path.join(root, file))
                 # return
 
-if __name__ == '__main__':
-    re_rules = read_re_rules(RE_RULES_FILE)
 
+if __name__ == '__main__':
+
+    parser = createParser()
+    namespace = parser.parse_args(sys.argv[1:])
+
+    rules_filePath = namespace.re_rules
+    if not os.path.isfile(rules_filePath):
+        print(f"Файл правил \"{rules_filePath}\" не существует.")
+        exit(-1)
+
+    print(f"Файл правил: {rules_filePath}.")
+
+    rules_dict = read_rules(rules_filePath)
     refactoring_all(source_files_dir)
