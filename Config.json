@@ -1,7 +1,7 @@
 {
-	"SourceRootDir" : "E:\\Work\\CodeRefact\\src",
-	"SourceFilesExt" : ["bsl"],
-	"SourceFilesCodePage" : "utf-8",
-	"RegExRulesPath" : "E:\\Work\\CodeRefact\\RefactoringRules.json",
-	"KeyWordToRU":	1
+	"Sources": {
+		"RootDir"   : "E:\\Work\\Test\\VipNet_EDI",
+		"Ext"       : "bsl",
+		"CodePage"  : "utf-8"
+	}
 }

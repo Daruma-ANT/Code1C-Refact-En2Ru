@@ -4,27 +4,8 @@ import os
 import re
 import argparse
 
-source_files_dir = "C:\\Users\\home\\OneDrive\\Repos\\ViPNetEDI\\ViPNetEDI_3\\src"
-source_files_cp = "utf-8"
-source_files_ext = ["bsl"]
-
-rules_dict = dict()
-
-dict_functions_name = {
-    "TypeOf": "ТипЗнч",
-    "Type": "Тип",
-    "Left": "Лев",
-    "Right": "Прав",
-    "Mid": "Сред",
-    "Find": "СтрНайти",
-    "StrFind": "СтрНайти",
-    "StrLen": "СтрДлина",
-    "IsBlankString": "ПустаяСтрока",
-}
-
 
 def create_parser():
-
     arg_parser = argparse.ArgumentParser(
         prog='coderefact',
         description='''Рефакторинг исходного кода модулей с английского на русский согласно описанных правил.
@@ -32,10 +13,21 @@ def create_parser():
                         ''',
         epilog='''ZAA 2021. Автор, как обычно, ни перед кем, ничего, никогда :)'''
     )
-    # parser.add_argument('-r', '--rules', type=argparse.FileType(), default="RefactoringRules.json")
-    arg_parser.add_argument('-r', '--rules', default="RefactoringRules.json", metavar="ПУТЬ",
-                            help="Путь к файлу с правилами (по умолчанию \"RefactoringRules.json\" в текущем каталоге)")
+    arg_parser.add_argument('-c', '--config', default="config.json", metavar="<Файл настроек>",
+                            help="Путь к файлу с настройками "
+                                 "(по умолчанию \"config.json\" в текущем каталоге)")
+    arg_parser.add_argument('-r', '--rules', default="refactoring_rules.json", metavar="<Файл c правилами>",
+                            help="Путь к файлу с правилами  "
+                                 "(по умолчанию - файл \"refactoring_rules.json\" из текущего каталога)")
+    arg_parser.add_argument('-f', '--function-names', default="function_names.json", metavar="<Файл с именами функций>",
+                            help="Путь к файлу со словарем функций "
+                                 "(ппо умолчанию - \"function_names.json\" из текущего каталога)")
     return arg_parser
+
+
+def read_json_to_dict(file_name) -> dict:
+    with open(file_name, "r", encoding="utf-8") as file:
+        return json.load(file)
 
 
 def read_rules(file_name: str) -> dict:
@@ -44,9 +36,8 @@ def read_rules(file_name: str) -> dict:
     :param file_name: str
     :return: dict
     """
-    with open(file_name, "r", encoding="utf-8") as rules_file:
-        data = {key: value for key, value in json.load(rules_file).items() if value.get("isApply", 0) == 1}
-    return data
+    with open(file_name, "r", encoding="utf-8") as file:
+        return {key: value for key, value in json.load(file).items() if value.get("isApply", True)}
 
 
 def apply_rule(text: str, rule: dict):
@@ -72,64 +63,90 @@ def apply_rule(text: str, rule: dict):
     return text
 
 
-def refactoring_functions_name(text: str):
+def translate_function_names(text: str, function_names: dict):
     """ Изменяет имена встроенных функций платформы c английского на русский
 
     :param text: str
+    :param function_names: dict: Словарь имен встроенных функций
     :return: str
     """
-    for key, value in dict_functions_name.items():
+    for key, value in function_names.items():
         # ([ = <> (])(TypeOf)\(
-        regex = r"([ =<>(])("+ key + ")\("
-        replace_to = r"\1"+ value + "("
+        regex = r"([ =<>(])(" + key + r")\("
+        replace_to = r"\1" + value + "("
         text = re.sub(regex, replace_to, text, 0, re.MULTILINE | re.IGNORECASE)
 
     return text
 
 
-def refactoring_module(file_path: str):
-    """ Обрабатывает содержимое переданного по имени файла
-    Args:
-        file_path (str): Путь к обрабатываемому файлу
+def refactoring_module(file_path: str, work_params: dict):
+    """ Обрабатывает содержимое единичного файла в соответствии с правилами
+
+        :param file_path: Путь к обрабатываемому файлу
+        :param work_params: Словарь с параметрами выполнения
     """
     print(f"Refactoring file: {file_path}".format(file_path=file_path))
-    text = ""
-    with open(file_path, "r", encoding=source_files_cp) as f:
+    with open(file_path, "r", encoding=work_params["code_page"]) as f:
         text = f.read()
 
     for rule_value in rules_dict.values():
         text = apply_rule(text, rule_value)
 
-    text = refactoring_functions_name(text)
+    text = translate_function_names(text, work_params["function_names"])
 
-    with open(file_path, "w", encoding=source_files_cp) as f:
+    with open(file_path, "w", encoding=work_params["code_page"]) as f:
         f.write(text)
 
 
-def refactoring_all(SourceFilesRoot: str):
+def refactoring_all(work_params):
     """В переданном каталоге обрабатывает рекурсивно все файлы с заданными расширениями
 
-    Args:
-        SourceFilesRoot (str): Корневой каталог файлов с исходными кодами
+    :param work_params: Словарь с параметрами обработки
+    :type work_params: dict
+
     """
-    for root, dirs, files in os.walk(SourceFilesRoot):
+    for root, dirs, files in os.walk(work_params["root_dir"]):
         for file in files:
-            if file.endswith(".bsl"):
-                refactoring_module(os.path.join(root, file))
+            if file.endswith(work_params["source_ext"]):
+                refactoring_module(os.path.join(root, file), work_params)
                 # return
+
+
+def check_file(file_path: str, file_desc: str) -> bool:
+    if not os.path.isfile(file_path):
+        print(f"{file_desc} \"{file_path}\" не существует.")
+        return False
+    else:
+        print(f"{file_desc}: \"{file_path}\"...")
+        return True
 
 
 if __name__ == '__main__':
 
     parser = create_parser()
-    namespace = parser.parse_args(sys.argv[1:])
+    namespace_args = parser.parse_args(sys.argv[1:])
 
-    rules_filepath = namespace.re_rules
-    if not os.path.isfile(rules_filepath):
-        print(f"Файл правил \"{rules_filepath}\" не существует.")
+    config_file = namespace_args.config
+    if not check_file(config_file, "Файл настроек"):
         exit(-1)
+    configs = read_json_to_dict(config_file)
 
-    print(f"Файл правил: {rules_filepath}.")
+    rules_file = namespace_args.rules
+    if not check_file(rules_file, "Файл правил"):
+        exit(-1)
+    rules_dict = read_rules(rules_file)
 
-    rules_dict = read_rules(rules_filepath)
-    refactoring_all(source_files_dir)
+    function_names_file = namespace_args.function_names
+    if not check_file(function_names_file, "Файл словаря функций"):
+        exit(-1)
+    functions_dict = read_json_to_dict(function_names_file)
+
+    params = {}
+    sources_config = configs.get("Sources", {})
+    params.setdefault("root_dir", sources_config.get("RootDir", os.getcwd()))
+    params.setdefault("code_page", sources_config.get("CodePage", "utf-8"))
+    params.setdefault("source_ext", sources_config.get("FilesExt", "bsl"))
+    params.setdefault("rules", rules_dict)
+    params.setdefault("function_names", functions_dict)
+
+    refactoring_all(params)
