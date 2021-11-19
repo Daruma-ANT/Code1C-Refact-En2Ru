@@ -1,9 +1,9 @@
-import sys
+import argparse
 import json
+import logging
 import os
 import re
-import argparse
-import logging
+import sys
 from typing import Dict, AnyStr, NamedTuple
 
 
@@ -50,7 +50,6 @@ def read_json_to_dict(file_name) -> Dict:
 
 def read_rules(file_name: str) -> Dict:
     """ Читает коллекцию активных правил рефакторинга из JSON файла
-
         :param file_name: Файл с правилами
         :param file_name: str
     """
@@ -61,23 +60,21 @@ def read_rules(file_name: str) -> Dict:
 
 def apply_rule(text: str, rule: Dict) -> str:
     """ Обрабатывает текст согласно переданному правилу
-
         :param text: Обрабатываемый правилом текст
         :param rule: Описание правила обработки
         :return: str
     """
     current_rule = RefactoringRule(**rule)
-    print(current_rule)
-
+    logging.info(current_rule)
     return re.sub(current_rule.reg_ex, current_rule.replace_by, text, 0, re.MULTILINE | re.IGNORECASE)
 
 
 def translate_function_names(text: AnyStr, function_names: Dict) -> AnyStr:
     """ Изменяет имена встроенных функций платформы c английского на русский
-
     :param text: Обрабатываемый текст
     :param function_names: Словарь имен функций
     """
+    logging.info("переименование функций...")
     for key, value in function_names.items():
         regex = r"([ =<>(])(" + key + r")\("
         replace_by = r"\1" + value + "("
@@ -88,11 +85,10 @@ def translate_function_names(text: AnyStr, function_names: Dict) -> AnyStr:
 
 def refactoring_module(file_path: str, work_params: Dict) -> None:
     """ Обрабатывает содержимое единичного файла в соответствии с правилами
-
         :param file_path: Путь к обрабатываемому файлу
         :param work_params: Словарь с параметрами выполнения
     """
-    print(f"Refactoring file: {file_path}".format(file_path=file_path))
+    logging.info(f"STARTED {file_path} ")
     with open(file_path, "r", encoding=work_params["code_page"]) as f:
         text = f.read()
 
@@ -104,28 +100,38 @@ def refactoring_module(file_path: str, work_params: Dict) -> None:
     with open(file_path, "w", encoding=work_params["code_page"]) as f:
         f.write(text)
 
+    logging.info(f"FINISHED {file_path}")
+
 
 def refactoring_all(work_params: Dict) -> None:
     """Обрабатывает рекурсивно все файлы с заданным расширением в корневом каталоге
-
     :param work_params: Словарь с параметрами обработки
     """
     for root, dirs, files in os.walk(work_params["root_dir"]):
         for file in files:
-            if file.endswith(work_params["source_ext"]):
+            file_ext = file.rsplit(sep=".", maxsplit=2)[-1]
+            if file_ext in work_params["source_ext"]:
                 refactoring_module(os.path.join(root, file), work_params)
 
 
 def check_file(file_path: str, file_desc: str) -> bool:
     if not os.path.isfile(file_path):
-        print(f"{file_desc} \"{file_path}\" не существует.")
+        logging.error(f"{file_desc} \"{file_path}\" не существует.")
         return False
     else:
-        print(f"{file_desc}: \"{file_path}\"...")
+        logging.info(f"{file_desc}: \"{file_path}\"...")
         return True
 
 
 if __name__ == '__main__':
+
+    logging.basicConfig(
+        level=logging.INFO,
+        filename="coderefact.log",
+        filemode="w",
+        format="%(asctime)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
+        datefmt='%H:%M:%S',
+    )
 
     parser = create_parser()
     namespace_args = parser.parse_args(sys.argv[1:])
@@ -145,12 +151,13 @@ if __name__ == '__main__':
         exit(-1)
     functions_dict = read_json_to_dict(function_names_file)
 
-    params = {}
     sources_config = configs.get("Sources", {})
-    params.setdefault("root_dir", sources_config.get("RootDir", os.getcwd()))
-    params.setdefault("code_page", sources_config.get("CodePage", "utf-8"))
-    params.setdefault("source_ext", sources_config.get("FilesExt", "bsl"))
-    params.setdefault("rules", rules_dict)
-    params.setdefault("function_names", functions_dict)
+    params = {
+                'root_dir': sources_config.get("root_dir", os.getcwd()),
+                'code_page': sources_config.get("code_page", "utf-8"),
+                'source_ext': sources_config.get("source_ext", ["bsl", ]),
+                'rules': rules_dict,
+                'function_names': functions_dict
+            }
 
     refactoring_all(params)

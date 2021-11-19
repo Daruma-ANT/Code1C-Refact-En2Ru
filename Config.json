@@ -1,7 +1,7 @@
 {
 	"Sources": {
-		"RootDir"   : "E:\\Work\\Test\\VipNet_EDI",
-		"Ext"       : "bsl",
-		"CodePage"  : "utf-8"
+		"root_dir"   : "E:\\Work\\Test\\VipNet_EDI",
+		"source_ext" : ["bsl"],
+		"code_page"  : "utf-8"
 	}
 }
