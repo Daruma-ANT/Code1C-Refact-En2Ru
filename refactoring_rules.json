@@ -1,103 +1,102 @@
 {
 	"Var": {
-		"isApply": 1,
-		"Desc": "Var --> Перем",
-		"RegEx": "^([ \t]*)(Var)([ \t]+)",
-		"ReplaceWith": "\\1Перем\\3"
+		"is_apply": true,
+		"desc": "Var --> Перем",
+		"reg_ex": "^([ \t]*)(Var)([ \t]+)",
+		"replace_by": "\\1Перем\\3"
 	},
 	"Return": {
-		"isApply": 1,
-		"Desc": "Return --> Возврат",
-		"RegEx": "^([ \t]+)(Return)([ \t;]*)",
-		"ReplaceWith": "\\1Возврат\\3"
+		"desc": "Return --> Возврат",
+		"reg_ex": "^([ \t]+)(Return)([ \t;]*)",
+		"replace_by": "\\1Возврат\\3"
 	},
 
 	"Try": {
-		"isApply": 0,
-		"Desc": "Try --> Попытка",
-		"RegEx": "^([ \t]+)(Try)([ \t;]*)",
-		"ReplaceWith": "\\1Попытка\\3"
+		"is_apply": false,
+		"desc": "Try --> Попытка",
+		"reg_ex": "^([ \t]+)(Try)([ \t;]*)",
+		"replace_by": "\\1Попытка\\3"
 	},
 	"Except": {
-		"isApply": 0,
-		"Desc": "Except --> Исключение",
-		"RegEx": "^([ \t]+)(Except)([ \t;]*)",
-		"ReplaceWith": "\\1Исключение\\3"
+		"is_apply": false,
+		"desc": "Except --> Исключение",
+		"reg_ex": "^([ \t]+)(Except)([ \t;]*)",
+		"replace_by": "\\1Исключение\\3"
 	},
 	"EndTry": {
-		"isApply": 0,
-		"Desc": "EndTry --> КонецПопытки",
-		"RegEx": "^([ \t]+)(EndTry)([ \t;]*)",
-		"ReplaceWith": "\\1КонецПопытки\\3"
+		"is_apply": false,
+		"desc": "EndTry --> КонецПопытки",
+		"reg_ex": "^([ \t]+)(EndTry)([ \t;]*)",
+		"replace_by": "\\1КонецПопытки\\3"
 	},
 
 	"IfThen": {
-		"isApply": 0,
-		"Desc": "If...Then --> Если...Тогда",
-		"RegEx"  : "^([ \\t]+)(If)(.+[ \\t]+)(Then)([ \\t]*)$",
-		"ReplaceWith": "\\1Если\\3Тогда\\5"
+		"is_apply": false,
+		"desc": "If...Then --> Если...Тогда",
+		"reg_ex": "^([ \\t]+)(If)(.+[ \\t]+)(Then)([ \\t]*)$",
+		"replace_by": "\\1Если\\3Тогда\\5"
 	},
 	"ElsIfThen": {
-		"isApply": 0,
-		"Desc": "ElsIf...Then --> ИначеЕсли...Тогда",
-		"RegEx": "^([ \\t]+)(ElsIf)(.+[ \\t]+)(Then)([ \\t]*)$",
-		"ReplaceWith": "\\1ИначеЕсли\\3Тогда\\5"
+		"is_apply": false,
+		"desc": "ElsIf...Then --> ИначеЕсли...Тогда",
+		"reg_ex": "^([ \\t]+)(ElsIf)(.+[ \\t]+)(Then)([ \\t]*)$",
+		"replace_by": "\\1ИначеЕсли\\3Тогда\\5"
 	},
 	"Else": {
-		"isApply": 0,
-		"Desc": "Else --> Иначе",
-		"RegEx": "^([ \\t]+)(Else)([ \\t]*)$",
-		"ReplaceWith": "\\1Иначе\\3"
+		"is_apply": false,
+		"desc": "Else --> Иначе",
+		"reg_ex": "^([ \\t]+)(Else)([ \\t]*)$",
+		"replace_by": "\\1Иначе\\3"
 	},
 	"EndIf": {
-		"isApply": 0,
-		"Desc": "EndIf --> КонецЕсли",
-		"RegEx": "^([ \\t]+)(EndIf)([ \\t;]*)$",
-		"ReplaceWith": "\\1КонецЕсли\\3"
+		"is_apply": false,
+		"desc": "EndIf --> КонецЕсли",
+		"reg_ex": "^([ \\t]+)(EndIf)([ \\t;]*)$",
+		"replace_by": "\\1КонецЕсли\\3"
 	},
 
 	"ForEach": {
-		"isApply": 0,
-		"Desc": "For Each...Do --> Для Каждого...Цикл",
-		"RegEx": "^([ \\t]+)(For Each)(.+[ \\t]+)(In)(.+[ \\t]+)(Do)([ \\t]*)$",
-		"ReplaceWith": "\\1Для Каждого\\3Из\\5Цикл\\7"
+		"is_apply": false,
+		"desc": "For Each...Do --> Для Каждого...Цикл",
+		"reg_ex": "^([ \\t]+)(For Each)(.+[ \\t]+)(In)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"replace_by": "\\1Для Каждого\\3Из\\5Цикл\\7"
 	},
 	"ForTo": {
-		"isApply": 0,
-		"Desc": "For...To...Do --> Для...По...Цикл",
-		"RegEx": "^([ \\t]+)(For)(.+[ \\t]+)(To)(.+[ \\t]+)(Do)([ \\t]*)$",
-		"ReplaceWith": "\\1Для\\3По\\5Цикл\\7"
+		"is_apply": false,
+		"desc": "For...To...Do --> Для...По...Цикл",
+		"reg_ex": "^([ \\t]+)(For)(.+[ \\t]+)(To)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"replace_by": "\\1Для\\3По\\5Цикл\\7"
 	},
 	"While": {
-		"isApply": 0,
-		"Desc": "While...Do --> Пока...Цикл",
-		"RegEx": "^([ \\t]+)(While)(.+[ \\t]+)(Do)([ \\t]*)$",
-		"ReplaceWith": "\\1Пока\\3Цикл\\5"
+		"is_apply": false,
+		"desc": "While...Do --> Пока...Цикл",
+		"reg_ex": "^([ \\t]+)(While)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"replace_by": "\\1Пока\\3Цикл\\5"
 	},
 	"EndDo": {
-		"isApply": 0,
-		"Desc": "EndDo --> КонецЦикла",
-		"RegEx": "^([ \\t]+)(EndDo)([ \\t;]*)$",
-		"ReplaceWith": "\\1КонецЦикла\\3"
+		"is_apply": false,
+		"desc": "EndDo --> КонецЦикла",
+		"reg_ex": "^([ \\t]+)(EndDo)([ \\t;]*)$",
+		"replace_by": "\\1КонецЦикла\\3"
 	},
 
 	"SignAssignment": {
-		"isApply": 0,
-		"Desc": "рефакторинг операции присваивания",
-		"RegEx": "[ ]*=[ ]*",
-		"ReplaceWith": " = "
+		"is_apply": false,
+		"desc": "рефакторинг операции присваивания",
+		"reg_ex": "[ ]*=[ ]*",
+		"replace_by": " = "
 	},
 	"TrailingSpaces": {
-		"isApply": 0,
-		"Desc": "удаление концевых пробелов",
-		"RegEx": "[ \\t]+$",
-		"ReplaceWith": ""
+		"is_apply": false,
+		"desc": "удаление концевых пробелов",
+		"reg_ex": "[ \\t]+$",
+		"replace_by": ""
 	},
 	"FunctionsGaps ": {
-		"isApply": 0,
-		"Desc": "сворачиваем промежутки между функциями (процедурами)",
-		"RegEx": "(?<=Конец(Функции)|(Процедуры))\\s*(?=(Функция|Процедура|&На))",
-		"ReplaceWith": "\\n\\n"
+		"is_apply": false,
+		"desc": "сворачиваем промежутки между функциями (процедурами)",
+		"reg_ex": "(?<=Конец(Функции)|(Процедуры))\\s*(?=(Функция|Процедура|&На))",
+		"replace_by": "\\n\\n"
 	}
 
 }
