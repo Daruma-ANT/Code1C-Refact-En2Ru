@@ -3,6 +3,24 @@ import json
 import os
 import re
 import argparse
+import logging
+from typing import Dict, AnyStr, NamedTuple
+
+
+class RefactoringRule(NamedTuple):
+    desc: AnyStr
+    reg_ex: AnyStr
+    replace_by: AnyStr
+    is_apply: bool = True
+
+    def __repr__(self) -> AnyStr:
+        if len(self.desc.strip()) != 0:
+            desc = self.desc.strip()
+        elif len(self.replace_by.strip()) != 0:
+            desc = f"Замена по шаблону: \"{self.reg_ex}\" --> '{self.replace_by}'"
+        else:
+            desc = f"Удаление по шаблону: \"{self.reg_ex}\""
+        return desc
 
 
 def create_parser():
@@ -25,61 +43,50 @@ def create_parser():
     return arg_parser
 
 
-def read_json_to_dict(file_name) -> dict:
+def read_json_to_dict(file_name) -> Dict:
     with open(file_name, "r", encoding="utf-8") as file:
         return json.load(file)
 
 
-def read_rules(file_name: str) -> dict:
-    """ Читает правила рефакторинга из JSON файла
+def read_rules(file_name: str) -> Dict:
+    """ Читает коллекцию активных правил рефакторинга из JSON файла
 
-    :param file_name: str
-    :return: dict
+        :param file_name: Файл с правилами
+        :param file_name: str
     """
     with open(file_name, "r", encoding="utf-8") as file:
-        return {key: value for key, value in json.load(file).items() if value.get("isApply", True)}
+        return {key: value for key, value in json.load(file).items()
+                if value.get("is_apply", True) and len(value.get("reg_ex", "")) > 0}
 
 
-def apply_rule(text: str, rule: dict):
+def apply_rule(text: str, rule: Dict) -> str:
     """ Обрабатывает текст согласно переданному правилу
 
-        :param text: str
-        :param rule: dict
+        :param text: Обрабатываемый правилом текст
+        :param rule: Описание правила обработки
         :return: str
     """
-    regex = rule.get("RegEx", "")
-    if len(regex.strip()) == 0:
-        return text
+    current_rule = RefactoringRule(**rule)
+    print(current_rule)
 
-    replace_to = rule.get("ReplaceWith", "")
-    if len(replace_to.strip()) != 0:
-        desc_default = f"Замена по шаблону: \"{regex}\" --> '{replace_to}'"
-    else:
-        desc_default = f"Удаление по шаблону: \"{regex}\""
-
-    print(rule.get("Desc", desc_default))
-
-    text = re.sub(regex, replace_to, text, 0, re.MULTILINE | re.IGNORECASE)
-    return text
+    return re.sub(current_rule.reg_ex, current_rule.replace_by, text, 0, re.MULTILINE | re.IGNORECASE)
 
 
-def translate_function_names(text: str, function_names: dict):
+def translate_function_names(text: AnyStr, function_names: Dict) -> AnyStr:
     """ Изменяет имена встроенных функций платформы c английского на русский
 
-    :param text: str
-    :param function_names: dict: Словарь имен встроенных функций
-    :return: str
+    :param text: Обрабатываемый текст
+    :param function_names: Словарь имен функций
     """
     for key, value in function_names.items():
-        # ([ = <> (])(TypeOf)\(
         regex = r"([ =<>(])(" + key + r")\("
-        replace_to = r"\1" + value + "("
-        text = re.sub(regex, replace_to, text, 0, re.MULTILINE | re.IGNORECASE)
+        replace_by = r"\1" + value + "("
+        text = re.sub(regex, replace_by, text, 0, re.MULTILINE | re.IGNORECASE)
 
     return text
 
 
-def refactoring_module(file_path: str, work_params: dict):
+def refactoring_module(file_path: str, work_params: Dict) -> None:
     """ Обрабатывает содержимое единичного файла в соответствии с правилами
 
         :param file_path: Путь к обрабатываемому файлу
@@ -89,8 +96,8 @@ def refactoring_module(file_path: str, work_params: dict):
     with open(file_path, "r", encoding=work_params["code_page"]) as f:
         text = f.read()
 
-    for rule_value in rules_dict.values():
-        text = apply_rule(text, rule_value)
+    for rule in rules_dict.values():
+        text = apply_rule(text, rule)
 
     text = translate_function_names(text, work_params["function_names"])
 
@@ -98,18 +105,15 @@ def refactoring_module(file_path: str, work_params: dict):
         f.write(text)
 
 
-def refactoring_all(work_params):
-    """В переданном каталоге обрабатывает рекурсивно все файлы с заданными расширениями
+def refactoring_all(work_params: Dict) -> None:
+    """Обрабатывает рекурсивно все файлы с заданным расширением в корневом каталоге
 
     :param work_params: Словарь с параметрами обработки
-    :type work_params: dict
-
     """
     for root, dirs, files in os.walk(work_params["root_dir"]):
         for file in files:
             if file.endswith(work_params["source_ext"]):
                 refactoring_module(os.path.join(root, file), work_params)
-                # return
 
 
 def check_file(file_path: str, file_desc: str) -> bool:
