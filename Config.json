@@ -1,7 +1,8 @@
 {
 	"Sources": {
-		"root_dir"   : "E:\\Work\\Test\\VipNet_EDI",
+		"root_dir"   : "%OneDrive%\\Repos\\ViPNetEDI\\ViPNetEDI_3\\src",
 		"source_ext" : ["bsl"],
 		"code_page"  : "utf-8"
-	}
+	},
+	"file_log_path": ""
 }

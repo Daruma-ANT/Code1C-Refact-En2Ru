@@ -4,7 +4,7 @@ import logging
 import os
 import re
 import sys
-from typing import Dict, AnyStr, NamedTuple
+from typing import AnyStr, Dict, NamedTuple
 
 
 class RefactoringRule(NamedTuple):
@@ -52,10 +52,11 @@ def read_rules(file_name: str) -> Dict:
     """ Читает коллекцию активных правил рефакторинга из JSON файла
         :param file_name: Файл с правилами
         :param file_name: str
+        :rtype: dict
     """
     with open(file_name, "r", encoding="utf-8") as file:
         return {key: value for key, value in json.load(file).items()
-                if value.get("is_apply", True) and len(value.get("reg_ex", "")) > 0}
+                if value.get("is_apply", False) and len(value.get("reg_ex", "")) > 0}
 
 
 def apply_rule(text: str, rule: Dict) -> str:
@@ -117,7 +118,7 @@ def refactoring_all(work_params: Dict) -> None:
 def check_file(file_path: str, file_desc: str) -> bool:
     if not os.path.isfile(file_path):
         logging.error(f"{file_desc} \"{file_path}\" не существует.")
-        return False
+        sys.exit(-1)
     else:
         logging.info(f"{file_desc}: \"{file_path}\"...")
         return True
@@ -137,18 +138,17 @@ if __name__ == '__main__':
     namespace_args = parser.parse_args(sys.argv[1:])
 
     config_file = namespace_args.config
-    if not check_file(config_file, "Файл настроек"):
-        exit(-1)
+    check_file(config_file, "Файл настроек")
     configs = read_json_to_dict(config_file)
 
     rules_file = namespace_args.rules
-    if not check_file(rules_file, "Файл правил"):
-        exit(-1)
+    check_file(rules_file, "Файл правил")
     rules_dict = read_rules(rules_file)
+    if len(rules_dict) == 0:
+        logging.info("В файле правил нет элементов к исполнению")
 
     function_names_file = namespace_args.function_names
-    if not check_file(function_names_file, "Файл словаря функций"):
-        exit(-1)
+    check_file(function_names_file, "Файл словаря функций")
     functions_dict = read_json_to_dict(function_names_file)
 
     sources_config = configs.get("Sources", {})

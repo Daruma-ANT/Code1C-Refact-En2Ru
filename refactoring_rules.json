@@ -1,6 +1,6 @@
 {
 	"Var": {
-		"is_apply": true,
+		"is_apply": false,
 		"desc": "Var --> Перем",
 		"reg_ex": "^([ \t]*)(Var)([ \t]+)",
 		"replace_by": "\\1Перем\\3"
@@ -58,13 +58,13 @@
 	"ForEach": {
 		"is_apply": false,
 		"desc": "For Each...Do --> Для Каждого...Цикл",
-		"reg_ex": "^([ \\t]+)(For Each)(.+[ \\t]+)(In)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"reg_ex": "^([ \\t]+)(For Each|Для Каждого)(.+[ \\t]+)(In|Из)(.+[ \\t]+)(Do|Цикл)([ \\t]*)$",
 		"replace_by": "\\1Для Каждого\\3Из\\5Цикл\\7"
 	},
 	"ForTo": {
 		"is_apply": false,
 		"desc": "For...To...Do --> Для...По...Цикл",
-		"reg_ex": "^([ \\t]+)(For)(.+[ \\t]+)(To)(.+[ \\t]+)(Do)([ \\t]*)$",
+		"reg_ex": "^([ \\t]+)(For|Для)(.+[ \\t]+)(To|По)(.+[ \\t]+)(Do|Цикл)([ \\t]*)$",
 		"replace_by": "\\1Для\\3По\\5Цикл\\7"
 	},
 	"While": {
@@ -80,6 +80,12 @@
 		"replace_by": "\\1КонецЦикла\\3"
 	},
 
+	"Comma": {
+		"is_apply": false,
+		"desc": "пробел после запятой",
+		"reg_ex": ",[ ]*",
+		"replace_by": ", "
+	},
 	"SignAssignment": {
 		"is_apply": false,
 		"desc": "рефакторинг операции присваивания",
