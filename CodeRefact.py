@@ -1,9 +1,9 @@
-import argparse
-import json
-import logging
-import os
-import re
-import sys
+from argparse import ArgumentParser
+from json import load
+from logging import error, info, basicConfig, INFO
+from os import path, walk, getcwd
+from re import sub, MULTILINE, IGNORECASE
+from sys import exit, argv
 from typing import AnyStr, Dict, NamedTuple
 
 
@@ -24,7 +24,7 @@ class RefactoringRule(NamedTuple):
 
 
 def create_parser():
-    arg_parser = argparse.ArgumentParser(
+    arg_parser = ArgumentParser(
         prog='coderefact',
         description='''Рефакторинг исходного кода модулей с английского на русский согласно описанных правил.
                         Правила находятся в файле в формате json, имя файла передаются программе через параметр --rules  
@@ -45,7 +45,7 @@ def create_parser():
 
 def read_json_to_dict(file_name) -> Dict:
     with open(file_name, "r", encoding="utf-8") as file:
-        return json.load(file)
+        return load(file)
 
 
 def read_rules(file_name: str) -> Dict:
@@ -55,7 +55,7 @@ def read_rules(file_name: str) -> Dict:
         :rtype: dict
     """
     with open(file_name, "r", encoding="utf-8") as file:
-        return {key: value for key, value in json.load(file).items()
+        return {key: value for key, value in load(file).items()
                 if value.get("is_apply", False) and len(value.get("reg_ex", "")) > 0}
 
 
@@ -66,8 +66,8 @@ def apply_rule(text: str, rule: Dict) -> str:
         :return: str
     """
     current_rule = RefactoringRule(**rule)
-    logging.info(current_rule)
-    return re.sub(current_rule.reg_ex, current_rule.replace_by, text, 0, re.MULTILINE | re.IGNORECASE)
+    info(current_rule)
+    return sub(current_rule.reg_ex, current_rule.replace_by, text, 0, MULTILINE | IGNORECASE)
 
 
 def translate_function_names(text: AnyStr, function_names: Dict) -> AnyStr:
@@ -75,11 +75,11 @@ def translate_function_names(text: AnyStr, function_names: Dict) -> AnyStr:
     :param text: Обрабатываемый текст
     :param function_names: Словарь имен функций
     """
-    logging.info("переименование функций...")
+    info("переименование функций...")
     for key, value in function_names.items():
         regex = r"([ =<>(])(" + key + r")\("
         replace_by = r"\1" + value + "("
-        text = re.sub(regex, replace_by, text, 0, re.MULTILINE | re.IGNORECASE)
+        text = sub(regex, replace_by, text, 0, MULTILINE | IGNORECASE)
 
     return text
 
@@ -89,7 +89,7 @@ def refactoring_module(file_path: str, work_params: Dict) -> None:
         :param file_path: Путь к обрабатываемому файлу
         :param work_params: Словарь с параметрами выполнения
     """
-    logging.info(f"STARTED {file_path} ")
+    info(f"STARTED {file_path} ")
     with open(file_path, "r", encoding=work_params["code_page"]) as f:
         text = f.read()
 
@@ -101,33 +101,33 @@ def refactoring_module(file_path: str, work_params: Dict) -> None:
     with open(file_path, "w", encoding=work_params["code_page"]) as f:
         f.write(text)
 
-    logging.info(f"FINISHED {file_path}")
+    info(f"FINISHED {file_path}")
 
 
 def refactoring_all(work_params: Dict) -> None:
     """Обрабатывает рекурсивно все файлы с заданным расширением в корневом каталоге
     :param work_params: Словарь с параметрами обработки
     """
-    for root, dirs, files in os.walk(work_params["root_dir"]):
+    for root, dirs, files in walk(work_params["root_dir"]):
         for file in files:
             file_ext = file.rsplit(sep=".", maxsplit=2)[-1]
             if file_ext in work_params["source_ext"]:
-                refactoring_module(os.path.join(root, file), work_params)
+                refactoring_module(path.join(root, file), work_params)
 
 
 def check_file(file_path: str, file_desc: str) -> bool:
-    if not os.path.isfile(file_path):
-        logging.error(f"{file_desc} \"{file_path}\" не существует.")
-        sys.exit(-1)
+    if not path.isfile(file_path):
+        error(f"{file_desc} \"{file_path}\" не существует.")
+        exit(-1)
     else:
-        logging.info(f"{file_desc}: \"{file_path}\"...")
+        info(f"{file_desc}: \"{file_path}\"...")
         return True
 
 
 if __name__ == '__main__':
 
-    logging.basicConfig(
-        level=logging.INFO,
+    basicConfig(
+        level=INFO,
         filename="coderefact.log",
         filemode="w",
         format="%(asctime)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     )
 
     parser = create_parser()
-    namespace_args = parser.parse_args(sys.argv[1:])
+    namespace_args = parser.parse_args(argv[1:])
 
     config_file = namespace_args.config
     check_file(config_file, "Файл настроек")
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     check_file(rules_file, "Файл правил")
     rules_dict = read_rules(rules_file)
     if len(rules_dict) == 0:
-        logging.info("В файле правил нет элементов к исполнению")
+        info("В файле правил нет элементов к исполнению")
 
     function_names_file = namespace_args.function_names
     check_file(function_names_file, "Файл словаря функций")
@@ -153,7 +153,7 @@ if __name__ == '__main__':
 
     sources_config = configs.get("Sources", {})
     params = {
-                'root_dir': sources_config.get("root_dir", os.getcwd()),
+                'root_dir': sources_config.get("root_dir", getcwd()),
                 'code_page': sources_config.get("code_page", "utf-8"),
                 'source_ext': sources_config.get("source_ext", ["bsl", ]),
                 'rules': rules_dict,
