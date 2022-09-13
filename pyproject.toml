@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "coderefact"
+version = "0.1.0"
+description = ""
+authors = ["Anatoly Zmievsky <AnatolyZmievsky@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+argparse = "^1.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,1 +1,1 @@
-python "C:\Users\home\OneDrive\Repos\CodeRefact\coderefact.py" --config config_edi_3.json --rules "C:\Users\home\OneDrive\Repos\CodeRefact\refactoring_rules.json" -f "C:\Users\home\OneDrive\Repos\CodeRefact\function_names.json"
+python "<...>\coderefact.py" --config config_edi_3.json --rules "<...>\refactoring_rules.json" -f "<...>\function_names.json"
